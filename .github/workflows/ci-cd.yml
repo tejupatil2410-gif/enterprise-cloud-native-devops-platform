@@ -1,0 +1,39 @@
+name: Build and Push Docker Images to ACR
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Login to Azure Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: enterprisecloudacr.azurecr.io
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
+
+    - name: Build Backend Image
+      run: |
+        docker build -t enterprisecloudacr.azurecr.io/backend:${{ github.sha }} ./backend
+
+    - name: Push Backend Image
+      run: |
+        docker push enterprisecloudacr.azurecr.io/backend:${{ github.sha }}
+
+    - name: Build Frontend Image
+      run: |
+        docker build -t enterprisecloudacr.azurecr.io/frontend:${{ github.sha }} ./frontend
+
+    - name: Push Frontend Image
+      run: |
+        docker push enterprisecloudacr.azurecr.io/frontend:${{ github.sha }}
